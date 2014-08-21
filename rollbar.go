@@ -69,7 +69,8 @@ func Error(level string, err error) {
 // ErrorWithStackSkip asynchronously sends an error to Rollbar with the given
 // severity level and a given number of stack trace frames skipped.
 func ErrorWithStackSkip(level string, err error, skip int) {
-	body := buildBody(level, err.Error())
+	parts := strings.SplitN(err.Error(), "\n", 2)
+	body := buildBody(level, parts[0])
 	data := body["data"].(map[string]interface{})
 	errBody, fingerprint := errorBody(err, skip)
 	data["body"] = errBody
@@ -83,7 +84,8 @@ func ErrorWithStackSkip(level string, err error, skip int) {
 // Message asynchronously sends a message to Rollbar with the given severity
 // level. Rollbar request is asynchronous.
 func Message(level string, msg string) {
-	body := buildBody(level, msg)
+	parts := strings.SplitN(msg, "\n", 2)
+	body := buildBody(level, parts[0])
 	data := body["data"].(map[string]interface{})
 	data["body"] = messageBody(msg)
 
