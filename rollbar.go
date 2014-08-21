@@ -204,6 +204,6 @@ func post(body map[string]interface{}) {
 		stderr(fmt.Sprintf("Rollbar response: %s", resp.Status))
 	}
 	if resp != nil && resp.Body != nil {
-		defer resp.Body.Close()
+		resp.Body.Close()
 	}
 }
