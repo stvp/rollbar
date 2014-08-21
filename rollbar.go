@@ -198,10 +198,12 @@ func post(body map[string]interface{}) {
 	}
 
 	resp, err := http.Post(Endpoint, "application/json", bytes.NewReader(jsonBody))
-	defer resp.Body.Close()
 	if err != nil {
 		stderr(fmt.Sprintf("Rollbar POST failed: %s", err.Error()))
 	} else if resp.StatusCode != 200 {
 		stderr(fmt.Sprintf("Rollbar response: %s", resp.Status))
+	}
+	if resp != nil && resp.Body != nil {
+		defer resp.Body.Close()
 	}
 }
