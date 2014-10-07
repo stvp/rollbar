@@ -1,12 +1,12 @@
-go-rollbar
-----------
+rollbar
+-------
 
-`go-rollbar` is a Rollbar client for reporting errors to Rollbar. Errors are
-reported asynchronously in a goroutine.
+`rollbar` is a Golang Rollbar client that makes it easy to report errors to
+Rollbar with full stacktraces. Errors are sent to Rollbar asynchronously in a
+background goroutine.
 
-Keep in mind that Go's `error` type doesn't contain stack trace
-information. `go-rollbar` reports the stack trace of the location that the
-error was reported, not created.
+Because Go's `error` type doesn't include stack information from when it was set
+or allocated, we use the stack information from where the error was reported.
 
 Documentation
 =============
@@ -16,38 +16,27 @@ Documentation
 Usage
 =====
 
-    package main
+```go
+package main
 
-    import (
-      "github.com/stvp/rollbar"
-    )
+import (
+  "github.com/stvp/rollbar"
+)
 
-    func main() {
-      rollbar.Token = "MY_TOKEN"
-      rollbar.Environment = "production" // defaults to "development"
+func main() {
+  rollbar.Token = "MY_TOKEN"
+  rollbar.Environment = "production" // defaults to "development"
 
-      result, err := DoSomething()
-      if err != nil {
-        // level should be one of: "critical", "error", "warning", "info", "debug"
-        rollbar.Error("error", err)
-      }
+  result, err := DoSomething()
+  if err != nil {
+    rollbar.Error(rollbar.ERR, err)
+  }
 
-      rollbar.Message("info", "Message body goes here")
+  rollbar.Message("info", "Message body goes here")
 
-      rollbar.Wait()
-    }
-
-Changelog
-=========
-
-* **0.0.4** - Don't send payloads to Rollbar when an empty API token is
-  supplied.
-* **0.0.3** - Remove incorrect "root" value that was being sent. That setting
-  is meant for the path to the root code directory, but we're running in a
-  compiled environment.
-* **0.0.2** - Add `Wait()` command to wait for all errors to be sent to
-  Rollbar, simplify reported error class for `errors.errorString` errors.
-* **0.0.1** - Initial release.
+  rollbar.Wait()
+}
+```
 
 Running Tests
 =============
@@ -59,3 +48,11 @@ variable to `go test`:
 
 And verify the reported errors manually.
 
+Contributors
+============
+
+A big thank you to everyone who has contributed pull requests and bug reports:
+
+* @kjk
+* @Soulou
+* @paulmach

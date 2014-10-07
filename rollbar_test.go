@@ -3,6 +3,7 @@ package rollbar
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"testing"
 )
@@ -67,4 +68,60 @@ func TestEverything(t *testing.T) {
 	// If you don't see the message sent on line 65 in Rollbar, that means this
 	// is broken:
 	Wait()
+}
+
+func TestErrorRequest(t *testing.T) {
+	r, _ := http.NewRequest("GET", "http://foo.com/somethere?param1=true", nil)
+	r.RemoteAddr = "1.1.1.1:123"
+
+	object := errorRequest(r)
+
+	if object["url"] != "http://foo.com/somethere?param1=true" {
+		t.Errorf("wrong url, got %v", object["url"])
+	}
+
+	if object["method"] != "GET" {
+		t.Errorf("wrong method, got %v", object["method"])
+	}
+
+	if object["query_string"] != "param1=true" {
+		t.Errorf("wrong id, got %v", object["query_string"])
+	}
+}
+
+func TestFilterParams(t *testing.T) {
+	values := map[string][]string{
+		"password":     []string{"one"},
+		"ok":           []string{"one"},
+		"access_token": []string{"one"},
+	}
+
+	clean := filterParams(values)
+	if clean["password"][0] != FILTERED {
+		t.Error("should filter password parameter")
+	}
+
+	if clean["ok"][0] == FILTERED {
+		t.Error("should keep ok parameter")
+	}
+
+	if clean["access_token"][0] != FILTERED {
+		t.Error("should filter access_token parameter")
+	}
+}
+
+func TestFlattenValues(t *testing.T) {
+	values := map[string][]string{
+		"a": []string{"one"},
+		"b": []string{"one", "two"},
+	}
+
+	flattened := flattenValues(values)
+	if flattened["a"].(string) != "one" {
+		t.Error("should flatten single parameter to string")
+	}
+
+	if len(flattened["b"].([]string)) != 2 {
+		t.Error("should leave multiple parametres as []string")
+	}
 }
