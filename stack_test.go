@@ -6,7 +6,7 @@ import (
 
 func TestBuildStack(t *testing.T) {
 	frame := BuildStack(1)[0]
-	if frame.Filename != "github.com/stvp/rollbar/stack_test.go" {
+	if frame.Filename != "github.com/triggit/rollbar/stack_test.go" {
 		t.Errorf("got: %s", frame.Filename)
 	}
 	if frame.Method != "rollbar.TestBuildStack" {
@@ -59,7 +59,7 @@ func TestShortenFilePath(t *testing.T) {
 		{"", ""},
 		{"foo.go", "foo.go"},
 		{"/usr/local/go/src/pkg/runtime/proc.c", "pkg/runtime/proc.c"},
-		{"/home/foo/go/src/github.com/stvp/rollbar.go", "github.com/stvp/rollbar.go"},
+		{"/home/foo/go/src/github.com/triggit/rollbar.go", "github.com/triggit/rollbar.go"},
 	}
 	for i, test := range tests {
 		got := shortenFilePath(test.Given)

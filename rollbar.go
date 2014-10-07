@@ -268,6 +268,9 @@ func post(body map[string]interface{}) {
 	if resp != nil {
 		resp.Body.Close()
 	}
+	if resp != nil && resp.Body != nil {
+		resp.Body.Close()
+	}
 }
 
 // -- stderr
