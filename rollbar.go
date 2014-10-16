@@ -53,6 +53,11 @@ var (
 	waitGroup   sync.WaitGroup
 )
 
+type Field struct {
+	Name string
+	Data interface{}
+}
+
 // -- Setup
 
 func init() {
@@ -69,42 +74,57 @@ func init() {
 // -- Error reporting
 
 // Error asynchronously sends an error to Rollbar with the given severity level.
-func Error(level string, err error) {
-	ErrorWithStackSkip(level, err, 1)
-}
-
-// RequestError asynchronously sends an error to Rollbar with the given
-// severity level and request-specific information.
-func RequestError(level string, r *http.Request, err error) {
-	RequestErrorWithStackSkip(level, r, err, 1)
+func Error(level string, err error, fields ...*Field) {
+	ErrorWithStackSkip(level, err, 1, fields...)
 }
 
 // ErrorWithStackSkip asynchronously sends an error to Rollbar with the given
 // severity level and a given number of stack trace frames skipped.
-func ErrorWithStackSkip(level string, err error, skip int) {
-	body := buildBody(level, err.Error())
-	data := body["data"].(map[string]interface{})
-	errBody, fingerprint := errorBody(err, skip)
-	data["body"] = errBody
-	data["fingerprint"] = fingerprint
+func ErrorWithStackSkip(level string, err error, skip int, fields ...*Field) {
+	stack := BuildStack(2 + skip)
+	ErrorWithStack(level, err, stack, fields...)
+}
 
-	push(body)
+func ErrorWithStack(level string, err error, stack Stack, fields ...*Field) {
+	buildAndPushError(level, err, stack, fields...)
+}
+
+// RequestError asynchronously sends an error to Rollbar with the given
+// severity level and request-specific information.
+func RequestError(level string, r *http.Request, err error, fields ...*Field) {
+	RequestErrorWithStackSkip(level, r, err, 1, fields...)
 }
 
 // RequestErrorWithStackSkip asynchronously sends an error to Rollbar with the
 // given severity level and a given number of stack trace frames skipped, in
 // addition to extra request-specific information.
-func RequestErrorWithStackSkip(level string, r *http.Request, err error, skip int) {
+func RequestErrorWithStackSkip(level string, r *http.Request, err error, skip int, fields ...*Field) {
+	stack := BuildStack(2 + skip)
+	RequestErrorWithStack(level, r, err, stack, fields...)
+}
+
+// RequestErrorWithStack is like RequestError, but the stack is given
+// as an argument
+func RequestErrorWithStack(level string, r *http.Request, err error, stack Stack, fields ...*Field) {
+	buildAndPushError(level, err, stack, &Field{Name: "request", Data: errorRequest(r)})
+}
+
+func buildError(level string, err error, stack Stack, fields ...*Field) map[string]interface{} {
 	body := buildBody(level, err.Error())
 	data := body["data"].(map[string]interface{})
-
-	errBody, fingerprint := errorBody(err, skip)
+	errBody, fingerprint := errorBody(err, stack)
 	data["body"] = errBody
 	data["fingerprint"] = fingerprint
 
-	data["request"] = errorRequest(r)
+	for _, field := range fields {
+		data[field.Name] = field.Data
+	}
 
-	push(body)
+	return body
+}
+
+func buildAndPushError(level string, err error, stack Stack, fields ...*Field) {
+	push(buildError(level, err, stack, fields...))
 }
 
 // -- Message reporting
@@ -152,10 +172,8 @@ func buildBody(level, title string) map[string]interface{} {
 	}
 }
 
-// Build an error inner-body for the given error. If skip is provided, that
-// number of stack trace frames will be skipped.
-func errorBody(err error, skip int) (map[string]interface{}, string) {
-	stack := BuildStack(3 + skip)
+// errorBody generate the error body with a given stack trace
+func errorBody(err error, stack Stack) (map[string]interface{}, string) {
 	fingerprint := stack.Fingerprint()
 	errBody := map[string]interface{}{
 		"trace": map[string]interface{}{

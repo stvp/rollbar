@@ -125,3 +125,41 @@ func TestFlattenValues(t *testing.T) {
 		t.Error("should leave multiple parametres as []string")
 	}
 }
+
+func TestCustomField(t *testing.T) {
+	body := buildError(ERR, errors.New("test-custom"), BuildStack(0), &Field{
+		Name: "custom",
+		Data: map[string]string{
+			"NAME1": "VALUE1",
+		},
+	})
+
+	dataField, ok := body["data"]
+	if !ok {
+		t.Error("should have field 'data'")
+	}
+
+	data, ok := dataField.(map[string]interface{})
+	if !ok {
+		t.Error("should be of type map[string]interface{}")
+	}
+
+	custom, ok := data["custom"]
+	if !ok {
+		t.Error("should have field 'custom'")
+	}
+
+	customMap, ok := custom.(map[string]string)
+	if !ok {
+		t.Error("should be a map[string]string")
+	}
+
+	val, ok := customMap["NAME1"]
+	if !ok {
+		t.Error("should have a key 'NAME1'")
+	}
+
+	if val != "VALUE1" {
+		t.Error("should be VALUE1")
+	}
+}
