@@ -48,6 +48,9 @@ var (
 	// Filter GET and POST parameters from being sent to Rollbar.
 	FilterFields = regexp.MustCompile("password|secret|token")
 
+	// Output of error, by default stderr
+	ErrorWriter = os.Stderr
+
 	// Queue of messages to be sent.
 	bodyChannel chan map[string]interface{}
 	waitGroup   sync.WaitGroup
@@ -299,8 +302,9 @@ func post(body map[string]interface{}) {
 }
 
 // -- stderr
-
 func stderr(format string, args ...interface{}) {
-	format = "Rollbar error: " + format + "\n"
-	fmt.Fprintf(os.Stderr, format, args...)
+	if ErrorWriter != nil {
+		format = "Rollbar error: " + format + "\n"
+		fmt.Fprintf(os.Stderr, format, args...)
+	}
 }
