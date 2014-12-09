@@ -1,7 +1,7 @@
-0.3.1 - December 8th, 2014
+0.3.1 - December 9th, 2014
 ==========================
 
-* ErrorWriter is now configurable. Thanks @Soulou!
+* ErrorWriter and Platform are now configurable. Thanks @Soulou!
 
 0.3.0 - October 30th, 2014
 ==========================
