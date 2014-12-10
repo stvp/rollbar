@@ -156,7 +156,9 @@ func Message(level string, msg string) {
 
 // -- Misc.
 
-// Wait will block until the queue of errors / messages is empty.
+// Wait will block until the queue of errors / messages is empty. This allows
+// you to ensure that errors / messages are sent to Rollbar before exiting an
+// application.
 func Wait() {
 	waitGroup.Wait()
 }
