@@ -53,6 +53,8 @@ var (
 
 	// Output of error, by default stderr
 	ErrorWriter = os.Stderr
+	// error channel to communicate errors occuring while processing the message queue
+	queueErrors chan error
 
 	// Queue of messages to be sent.
 	bodyChannel chan map[string]interface{}
@@ -69,12 +71,23 @@ type Field struct {
 
 func init() {
 	bodyChannel = make(chan map[string]interface{}, Buffer)
+	queueErrors = make(chan error, Buffer)
 
 	go func() {
+		var err error
 		for body := range bodyChannel {
-			post(body)
+			if err = post(body); err != nil {
+				// if the user doesn't pull the errors out and the Buffer on the
+				// error channel has run full, pull out the oldest error and drop
+				// it on the floor.
+				if len(queueErrors) == Buffer {
+					_ = <-queueErrors
+				}
+				queueErrors <- err
+			}
 			waitGroup.Done()
 		}
+		close(queueErrors)
 	}()
 }
 
@@ -161,6 +174,12 @@ func Message(level string, msg string) {
 // application.
 func Wait() {
 	waitGroup.Wait()
+}
+
+// SendErrors returns a channel from which you can receive errors that occured
+// during processing the messagequeue.
+func SendErrors() <-chan error {
+	return queueErrors
 }
 
 // Build the main JSON structure that will be sent to Rollbar with the
@@ -283,27 +302,34 @@ func push(body map[string]interface{}) {
 }
 
 // POST the given JSON body to Rollbar synchronously.
-func post(body map[string]interface{}) {
+func post(body map[string]interface{}) error {
 	if len(Token) == 0 {
 		stderr("empty token")
-		return
+		return ErrNoToken{}
 	}
 
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
 		stderr("failed to encode payload: %s", err.Error())
-		return
+		return err
 	}
 
 	resp, err := http.Post(Endpoint, "application/json", bytes.NewReader(jsonBody))
 	if err != nil {
 		stderr("POST failed: %s", err.Error())
-	} else if resp.StatusCode != 200 {
-		stderr("received response: %s", resp.Status)
+		return err
 	}
+
+	if resp.StatusCode != 200 {
+		stderr("received response: %s", resp.Status)
+		return ErrHttpError(resp.StatusCode)
+	}
+
 	if resp != nil {
 		resp.Body.Close()
 	}
+
+	return nil
 }
 
 // -- stderr

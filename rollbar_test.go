@@ -163,3 +163,32 @@ func TestCustomField(t *testing.T) {
 		t.Error("should be VALUE1")
 	}
 }
+
+func TestErrorRead(t *testing.T) {
+	Token = os.Getenv("TOKEN")
+	Environment = "test"
+
+	bckBuffer, bckEP := Buffer, Endpoint
+	defer func() {
+		Buffer, Endpoint = bckBuffer, bckEP
+	}()
+
+	Buffer = 2
+	Endpoint = "https://does.not.exsist/foo/bar"
+
+	go func() {
+		errCount := 0
+		for err := range SendErrors() {
+			t.Log(err)
+			errCount++
+		}
+		if errCount != 2 {
+			t.Fatal("didn't receive the right number of errors", errCount)
+		}
+	}()
+
+	post(nil)
+	post(nil)
+
+	Wait()
+}
