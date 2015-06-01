@@ -54,6 +54,10 @@ var (
 	// Output of error, by default stderr
 	ErrorWriter = os.Stderr
 
+	// All errors and messages will be submitted under this code
+	// version. If this is blank no value will be sent
+	CodeVersion = ""
+
 	// Queue of messages to be sent.
 	bodyChannel chan map[string]interface{}
 	waitGroup   sync.WaitGroup
@@ -169,23 +173,28 @@ func buildBody(level, title string) map[string]interface{} {
 	timestamp := time.Now().Unix()
 	hostname, _ := os.Hostname()
 
+	data = map[string]interface{}{
+		"environment": Environment,
+		"title":       title,
+		"level":       level,
+		"timestamp":   timestamp,
+		"platform":    Platform,
+		"language":    "go",
+		"server": map[string]interface{}{
+			"host": hostname,
+		},
+		"notifier": map[string]interface{}{
+			"name":    NAME,
+			"version": VERSION,
+		},
+	}
+	if CodeVersion != "" {
+		data["code_version"] = CodeVersion
+	}
+
 	return map[string]interface{}{
 		"access_token": Token,
-		"data": map[string]interface{}{
-			"environment": Environment,
-			"title":       title,
-			"level":       level,
-			"timestamp":   timestamp,
-			"platform":    Platform,
-			"language":    "go",
-			"server": map[string]interface{}{
-				"host": hostname,
-			},
-			"notifier": map[string]interface{}{
-				"name":    NAME,
-				"version": VERSION,
-			},
-		},
+		"data":         data,
 	}
 }
 
