@@ -173,7 +173,7 @@ func buildBody(level, title string) map[string]interface{} {
 	timestamp := time.Now().Unix()
 	hostname, _ := os.Hostname()
 
-	data = map[string]interface{}{
+	data := map[string]interface{}{
 		"environment": Environment,
 		"title":       title,
 		"level":       level,
