@@ -125,7 +125,7 @@ func RequestErrorWithStackSkip(level string, r *http.Request, err error, skip in
 // http.Request, and a custom Stack. You You can pass, optionally, custom
 // Fields to be passed on to Rollbar.
 func RequestErrorWithStack(level string, r *http.Request, err error, stack Stack, fields ...*Field) {
-	buildAndPushError(level, err, stack, &Field{Name: "request", Data: errorRequest(r)})
+	buildAndPushError(level, err, stack, append(fields, &Field{Name: "request", Data: errorRequest(r)})...)
 }
 
 func buildError(level string, err error, stack Stack, fields ...*Field) map[string]interface{} {
@@ -228,7 +228,8 @@ func errorRequest(r *http.Request) map[string]interface{} {
 		"GET":          flattenValues(cleanQuery),
 
 		// POST / PUT params
-		"POST": flattenValues(filterParams(r.Form)),
+		"POST":    flattenValues(filterParams(r.Form)),
+		"user_ip": r.RemoteAddr,
 	}
 }
 
