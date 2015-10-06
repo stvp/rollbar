@@ -126,6 +126,11 @@ func TestFlattenValues(t *testing.T) {
 	}
 }
 
+func TestBuildError(t *testing.T) {
+	body := buildError(ERR, nil, BuildStack(0))
+	// this should not panic
+}
+
 func TestCustomField(t *testing.T) {
 	body := buildError(ERR, errors.New("test-custom"), BuildStack(0), &Field{
 		Name: "custom",

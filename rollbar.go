@@ -61,6 +61,9 @@ var (
 	// Queue of messages to be sent.
 	bodyChannel chan map[string]interface{}
 	waitGroup   sync.WaitGroup
+
+	// nilErrTitle is the title reported if the passed in error is nil.
+	nilErrTitle = "<nil>"
 )
 
 // Fields can be used to pass arbitrary data to the Rollbar API.
@@ -129,7 +132,12 @@ func RequestErrorWithStack(level string, r *http.Request, err error, stack Stack
 }
 
 func buildError(level string, err error, stack Stack, fields ...*Field) map[string]interface{} {
-	body := buildBody(level, err.Error())
+	title := nilErrTitle
+	if err != nil {
+		title = err.Error()
+	}
+
+	body := buildBody(level, title)
 	data := body["data"].(map[string]interface{})
 	errBody, fingerprint := errorBody(err, stack)
 	data["body"] = errBody
@@ -200,13 +208,18 @@ func buildBody(level, title string) map[string]interface{} {
 
 // errorBody generates a Rollbar error body with a given stack trace.
 func errorBody(err error, stack Stack) (map[string]interface{}, string) {
+	message := nilErrTitle
+	if err != nil {
+		message = err.Error()
+	}
+
 	fingerprint := stack.Fingerprint()
 	errBody := map[string]interface{}{
 		"trace": map[string]interface{}{
 			"frames": stack,
 			"exception": map[string]interface{}{
 				"class":   errorClass(err),
-				"message": err.Error(),
+				"message": message,
 			},
 		},
 	}
@@ -269,6 +282,10 @@ func messageBody(s string) map[string]interface{} {
 }
 
 func errorClass(err error) string {
+	if err == nil {
+		return nilErrTitle
+	}
+
 	class := reflect.TypeOf(err).String()
 	if class == "" {
 		return "panic"
