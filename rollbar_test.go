@@ -127,7 +127,7 @@ func TestFlattenValues(t *testing.T) {
 }
 
 func TestBuildError(t *testing.T) {
-	body := buildError(ERR, nil, BuildStack(0))
+	buildError(ERR, nil, BuildStack(0))
 	// this should not panic
 }
 
