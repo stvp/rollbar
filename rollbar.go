@@ -365,7 +365,7 @@ func post(body map[string]interface{}) error {
 
 	if resp.StatusCode != 200 {
 		stderr("received response: %s", resp.Status)
-		return ErrHttpError(resp.StatusCode)
+		return ErrHTTPError(resp.StatusCode)
 	}
 
 	if resp != nil {
