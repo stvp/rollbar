@@ -183,7 +183,7 @@ func TestErrorRead(t *testing.T) {
 
 	go func() {
 		errCount := 0
-		for err := range SendErrors() {
+		for err := range PostErrors() {
 			t.Log(err)
 			errCount++
 		}

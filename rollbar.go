@@ -17,60 +17,76 @@ import (
 )
 
 const (
-	NAME    = "go-rollbar"
+	// NAME is the name of this notifier library as reported to the Rollbar API.
+	NAME = "go-rollbar"
+
+	// VERSION is the version number of this notifier library as reported to the
+	// Rollbar API.
 	VERSION = "0.3.1"
 
-	// Severity levels
-	CRIT  = "critical"
-	ERR   = "error"
-	WARN  = "warning"
-	INFO  = "info"
+	// CRIT is the critical Rollbar severity level as reported to the Rollbar
+	// API.
+	CRIT = "critical"
+
+	// ERR is the error Rollbar severity level as reported to the Rollbar API.
+	ERR = "error"
+
+	// WARN is the warning Rollbar severity level as reported to the Rollbar API.
+	WARN = "warning"
+
+	// INFO is the info Rollbar severity level as reported to the Rollbar API.
+	INFO = "info"
+
+	// DEBUG is the debug Rollbar severity level as reported to the Rollbar API.
 	DEBUG = "debug"
 
+	// FILTERED is the text that replaces all sensitive values in items sent to
+	// the Rollbar API.
 	FILTERED = "[FILTERED]"
 )
 
 var (
-	// Rollbar access token. If this is blank, no errors will be reported to
-	// Rollbar.
+	// Token is the Rollbar access token under which all items will be reported.
+	// If Token is blank, no errors will be reported to Rollbar.
 	Token = ""
 
-	// All errors and messages will be submitted under this environment.
+	// Environment is the environment under which all items will be reported.
 	Environment = "development"
 
-	// Platform, default to OS, but could be change ('client' for instance)
+	// Platform is the platform reported for all Rollbar items. The default is
+	// the running operating system (darwin, freebsd, linux, etc.) but it can
+	// also be application specific (client, heroku, etc.).
 	Platform = runtime.GOOS
 
-	// API endpoint for Rollbar.
+	// Endpoint is the URL destination for all Rollbar item POST requests.
 	Endpoint = "https://api.rollbar.com/api/1/item/"
 
-	// Maximum number of errors allowed in the sending queue before we start
-	// dropping new errors on the floor.
+	// Buffer is the maximum number of errors that will be queued for sending.
+	// When the buffer is full, new errors are dropped on the floor until the API
+	// can catch up.
 	Buffer = 1000
 
-	// Filter GET and POST parameters from being sent to Rollbar.
+	// FilterFields is a regular expression that matches field names that should
+	// not be sent to Rollbar. Values for these fields are replaced with
+	// "[FILTERED]".
 	FilterFields = regexp.MustCompile("password|secret|token")
 
-	// Output of error, by default stderr
+	// ErrorWriter is the destination for errors encountered while POSTing items
+	// to Rollbar. By default, this is stderr. This can be nil.
 	ErrorWriter = os.Stderr
 
-	// All errors and messages will be submitted under this code
-	// version. If this is blank no value will be sent
+	// CodeVersion is the optional code version reported to the Rollbar API for
+	// all items.
 	CodeVersion = ""
 
-	// Queue of messages to be sent.
 	bodyChannel chan map[string]interface{}
 	waitGroup   sync.WaitGroup
-
-	// postErrors receives all errors encountered while POSTing items to the
-	// Rollbar API.
-	postErrors chan error
-
-	// nilErrTitle is the title reported if the passed in error is nil.
+	postErrors  chan error
 	nilErrTitle = "<nil>"
 )
 
-// Fields can be used to pass arbitrary data to the Rollbar API.
+// Field is a custom data field used to report arbitrary data to the Rollbar
+// API.
 type Field struct {
 	Name string
 	Data interface{}
@@ -268,7 +284,7 @@ func errorRequest(r *http.Request) map[string]interface{} {
 // filterParams filters sensitive information like passwords from being sent to
 // Rollbar.
 func filterParams(values map[string][]string) map[string][]string {
-	for key, _ := range values {
+	for key := range values {
 		if FilterFields.Match([]byte(key)) {
 			values[key] = []string{FILTERED}
 		}
