@@ -1,3 +1,9 @@
+0.3.2 - October 13, 2015
+========================
+
+* PostErrors() returns a channel that receives errors encountered while POSTing
+  items to the Rollbar API. Thanks @tike!
+
 0.3.1 - December 9th, 2014
 ==========================
 
