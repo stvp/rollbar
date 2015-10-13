@@ -53,8 +53,6 @@ var (
 
 	// Output of error, by default stderr
 	ErrorWriter = os.Stderr
-	// error channel to communicate errors occuring while processing the message queue
-	queueErrors chan error
 
 	// All errors and messages will be submitted under this code
 	// version. If this is blank no value will be sent
@@ -63,6 +61,10 @@ var (
 	// Queue of messages to be sent.
 	bodyChannel chan map[string]interface{}
 	waitGroup   sync.WaitGroup
+
+	// postErrors receives all errors encountered while POSTing items to the
+	// Rollbar API.
+	postErrors chan error
 
 	// nilErrTitle is the title reported if the passed in error is nil.
 	nilErrTitle = "<nil>"
@@ -78,23 +80,21 @@ type Field struct {
 
 func init() {
 	bodyChannel = make(chan map[string]interface{}, Buffer)
-	queueErrors = make(chan error, Buffer)
+	postErrors = make(chan error, Buffer)
 
 	go func() {
 		var err error
 		for body := range bodyChannel {
-			if err = post(body); err != nil {
-				// if the user doesn't pull the errors out and the Buffer on the
-				// error channel has run full, pull out the oldest error and drop
-				// it on the floor.
-				if len(queueErrors) == Buffer {
-					_ = <-queueErrors
+			err = post(body)
+			if err != nil {
+				if len(postErrors) == cap(postErrors) {
+					<-postErrors
 				}
-				queueErrors <- err
+				postErrors <- err
 			}
 			waitGroup.Done()
 		}
-		close(queueErrors)
+		close(postErrors)
 	}()
 }
 
@@ -181,17 +181,17 @@ func Message(level string, msg string) {
 
 // -- Misc.
 
+// PostErrors returns a channel that receives all errors encountered while
+// POSTing items to the Rollbar API.
+func PostErrors() <-chan error {
+	return postErrors
+}
+
 // Wait will block until the queue of errors / messages is empty. This allows
 // you to ensure that errors / messages are sent to Rollbar before exiting an
 // application.
 func Wait() {
 	waitGroup.Wait()
-}
-
-// SendErrors returns a channel from which you can receive errors that occured
-// during processing the messagequeue.
-func SendErrors() <-chan error {
-	return queueErrors
 }
 
 // Build the main JSON structure that will be sent to Rollbar with the
@@ -332,7 +332,7 @@ func push(body map[string]interface{}) {
 func post(body map[string]interface{}) error {
 	if len(Token) == 0 {
 		stderr("empty token")
-		return ErrNoToken{}
+		return nil
 	}
 
 	jsonBody, err := json.Marshal(body)
