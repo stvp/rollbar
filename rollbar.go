@@ -22,7 +22,7 @@ const (
 
 	// VERSION is the version number of this notifier library as reported to the
 	// Rollbar API.
-	VERSION = "0.3.1"
+	VERSION = "0.4.0"
 
 	// CRIT is the critical Rollbar severity level as reported to the Rollbar
 	// API.
