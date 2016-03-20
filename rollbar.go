@@ -117,7 +117,7 @@ func init() {
 // -- Error reporting
 
 func Errorf(level string, format string, args ...interface{}) {
-	ErrorWithStackSkip(level, fmt.Errorf(format, args), 1)
+	ErrorWithStackSkip(level, fmt.Errorf(format, args...), 1)
 }
 
 // Error asynchronously sends an error to Rollbar with the given severity
