@@ -366,14 +366,11 @@ func post(body map[string]interface{}) error {
 		stderr("POST failed: %s", err.Error())
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		stderr("received response: %s", resp.Status)
 		return ErrHTTPError(resp.StatusCode)
-	}
-
-	if resp != nil {
-		resp.Body.Close()
 	}
 
 	return nil
