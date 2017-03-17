@@ -14,6 +14,15 @@ You may also want to look at:
 * [stvp/roll](https://github.com/stvp/roll) - Simpler, synchronous (no
   background goroutine) with a nicer API.
 
+Installation
+=============
+
+Standard installation to your GOPATH via go get:
+
+```
+go get github.com/stvp/rollbar
+```
+
 Documentation
 =============
 
@@ -35,11 +44,15 @@ func main() {
 
   result, err := DoSomething()
   if err != nil {
+    // Error reporting
     rollbar.Error(rollbar.ERR, err)
   }
 
+  // Message reporting
   rollbar.Message("info", "Message body goes here")
 
+  // Block until all queued messages are sent to Rollbar.
+  // You can do this in a defer() if needed.
   rollbar.Wait()
 }
 ```
@@ -53,6 +66,17 @@ variable to `go test`:
     TOKEN=f0df01587b8f76b2c217af34c479f9ea go test
 
 And verify the reported errors manually in the Rollbar dashboard.
+
+Other Resources
+===============
+
+For best practices and more information on how to handle errors in Go, these are
+some great places to get started:
+
+[Error Handling in Go](https://blog.golang.org/error-handling-and-go)
+[Why does Go not have exceptions?](https://golang.org/doc/faq#exceptions)
+[Defer, Panic and Recover](https://blog.golang.org/defer-panic-and-recover)
+[pkg/errors](https://github.com/pkg/errors)
 
 Contributors
 ============
