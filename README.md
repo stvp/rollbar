@@ -14,6 +14,15 @@ You may also want to look at:
 * [stvp/roll](https://github.com/stvp/roll) - Simpler, synchronous (no
   background goroutine) with a nicer API.
 
+Installation
+=============
+
+Assumming you have Go properly installed, as well as the proper workspace file structure, run the following command from your working project directory:
+
+```
+go get github.com/stvp/rollbar
+```
+
 Documentation
 =============
 
@@ -26,6 +35,7 @@ Usage
 package main
 
 import (
+  // depending on your text edtitor / IDE / plugins,  some do not allow unused import statements, so make sure to add the import, make the rollbar calls below, and then save the file or else the line might automatically get removed
   "github.com/stvp/rollbar"
 )
 
@@ -35,7 +45,7 @@ func main() {
 
   result, err := DoSomething()
   if err != nil {
-    rollbar.Error(rollbar.ERR, err)
+    rollbar.Error(rollbar.ERR, err) // call this anywhere necessary in your code, along with rollbar.Wait() if needed
   }
 
   rollbar.Message("info", "Message body goes here")
