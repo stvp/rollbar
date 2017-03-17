@@ -73,10 +73,10 @@ Other Resources
 For best practices and more information on how to handle errors in Go, these are
 some great places to get started:
 
-[Error Handling in Go](https://blog.golang.org/error-handling-and-go)
-[Why does Go not have exceptions?](https://golang.org/doc/faq#exceptions)
-[Defer, Panic and Recover](https://blog.golang.org/defer-panic-and-recover)
-[pkg/errors](https://github.com/pkg/errors)
+* [Error Handling in Go](https://blog.golang.org/error-handling-and-go)
+* [Why does Go not have exceptions?](https://golang.org/doc/faq#exceptions)
+* [Defer, Panic and Recover](https://blog.golang.org/defer-panic-and-recover)
+* [pkg/errors](https://github.com/pkg/errors)
 
 Contributors
 ============
