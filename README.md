@@ -89,4 +89,6 @@ Thanks, all!
 * @paulmach
 * @Soulou
 * @tike
+* @tysonmote
+* @marcelgruber
 
