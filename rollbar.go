@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash/adler32"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -73,7 +74,7 @@ var (
 
 	// ErrorWriter is the destination for errors encountered while POSTing items
 	// to Rollbar. By default, this is stderr. This can be nil.
-	ErrorWriter = os.Stderr
+	ErrorWriter io.Writer = os.Stderr
 
 	// CodeVersion is the optional code version reported to the Rollbar API for
 	// all items.
