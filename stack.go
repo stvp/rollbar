@@ -1,8 +1,6 @@
 package rollbar
 
 import (
-	"fmt"
-	"hash/crc32"
 	"os"
 	"runtime"
 	"strings"
@@ -41,17 +39,6 @@ func BuildStack(skip int) Stack {
 	}
 
 	return stack
-}
-
-// Fingerprint builds a string that uniquely identifies a Rollbar item using
-// the full stacktrace. The fingerprint is used to ensure (to a reasonable
-// degree) that items are coalesced by Rollbar in a smart way.
-func (s Stack) Fingerprint() string {
-	hash := crc32.NewIEEE()
-	for _, frame := range s {
-		fmt.Fprintf(hash, "%s%s%d", frame.Filename, frame.Method, frame.Line)
-	}
-	return fmt.Sprintf("%x", hash.Sum32())
 }
 
 // Remove un-needed information from the source file path. This makes them
