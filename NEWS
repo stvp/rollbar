@@ -1,3 +1,11 @@
+0.5.0 - May 22, 2017
+========================
+
+* Added Errorf function
+* Always close response body
+* Updated README
+* Stop using and remove custom fingerprint
+
 0.4.0 - October 13, 2015
 ========================
 
