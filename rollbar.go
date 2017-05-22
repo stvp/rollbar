@@ -84,6 +84,7 @@ var (
 	waitGroup   sync.WaitGroup
 	postErrors  chan error
 	nilErrTitle = "<nil>"
+	Client = http.DefaultClient
 )
 
 // Field is a custom data field used to report arbitrary data to the Rollbar
@@ -360,7 +361,7 @@ func post(body map[string]interface{}) error {
 		return err
 	}
 
-	resp, err := http.Post(Endpoint, "application/json", bytes.NewReader(jsonBody))
+	resp, err := Client.Post(Endpoint, "application/json", bytes.NewReader(jsonBody))
 	if err != nil {
 		stderr("POST failed: %s", err.Error())
 		return err
