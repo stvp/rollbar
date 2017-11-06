@@ -117,6 +117,9 @@ func init() {
 
 // -- Error reporting
 
+// Errorf asynchronously sends an error to Rollbar with the given severity
+// level. You can pass, optionally, a format specifier that the error message
+// will be formatted according to.
 func Errorf(level string, format string, args ...interface{}) {
 	ErrorWithStackSkip(level, fmt.Errorf(format, args...), 1)
 }
