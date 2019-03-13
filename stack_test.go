@@ -29,7 +29,7 @@ func TestBuildStackWithCallers(t *testing.T) {
 	if frame.Method != "rollbar.TestBuildStackWithCallers" {
 		t.Errorf("got method: %s", frame.Method)
 	}
-	if frame.Line != 22 {
+	if frame.Line != 25 {
 		t.Errorf("got line: %d", frame.Line)
 	}
 }
