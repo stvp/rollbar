@@ -49,7 +49,7 @@ func main() {
   }
 
   // Message reporting
-  rollbar.Message("info", "Message body goes here")
+  rollbar.Message(rollbar.INFO, "Message body goes here")
 
   // Block until all queued messages are sent to Rollbar.
   // You can do this in a defer() if needed.
