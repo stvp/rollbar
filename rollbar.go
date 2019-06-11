@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"hash/adler32"
 	"io"
 	"net/http"
 	"net/url"
@@ -330,9 +329,6 @@ func errorClass(err error) string {
 	class := reflect.TypeOf(err).String()
 	if class == "" {
 		return "panic"
-	} else if class == "*errors.errorString" {
-		checksum := adler32.Checksum([]byte(err.Error()))
-		return fmt.Sprintf("{%x}", checksum)
 	} else {
 		return strings.TrimPrefix(class, "*")
 	}
